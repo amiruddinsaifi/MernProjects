@@ -4,7 +4,6 @@ import Spinner from './Spinner'
 import PropTypes from 'prop-types'
 import InfiniteScroll from 'react-infinite-scroll-component'
 
-
 export class News extends Component {
   static defaultProps= {
     pageSize:8,
@@ -32,14 +31,19 @@ export class News extends Component {
   }
   
   async updateNews(){
-    let url =`https://newsapi.org/v2/top-headlines?country=${this.props.countryCode}&category=${this.props.category}&apiKey=57aa3216c1454446802c55b591c26616&page=${this.state.page}&pageSize=${this.props.pageSize}`;
+    this.props.setProgress(10)
+    let url =`https://newsapi.org/v2/top-headlines?country=${this.props.countryCode}&category=${this.props.category}&apiKey=${this.props.apikey}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
     this.setState({loading:true})
 
    //  let url ="https://newsapi.org/v2/everything?q=tesla&from=2023-04-10&sortBy=publishedAt&category={this.state.category}&apiKey=57aa3216c1454446802c55b591c26616";
     let data = await fetch(url);
+    this.props.setProgress(30)
     let parsedData = await data.json();
+    this.props.setProgress(50)
     console.log(parsedData);
     this.setState({articles:parsedData.articles, totalResults:parsedData.totalResults, loading:false})
+    this.props.setProgress(100)
+
   }
 
   async componentDidMount(){
@@ -87,8 +91,7 @@ export class News extends Component {
 
   fetchData = async() => {
   this.setState({page:this.state.page+1});
-  let url =`https://newsapi.org/v2/top-headlines?country=${this.props.countryCode}&category=${this.props.category}&apiKey=57aa3216c1454446802c55b591c26616&page=${this.state.page}&pageSize=${this.props.pageSize}`;
-    this.setState({loading:true})
+  let url =`https://newsapi.org/v2/top-headlines?country=${this.props.countryCode}&category=${this.props.category}&apiKey=${this.props.apikey}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
 
    //  let url ="https://newsapi.org/v2/everything?q=tesla&from=2023-04-10&sortBy=publishedAt&category={this.state.category}&apiKey=57aa3216c1454446802c55b591c26616";
     let data = await fetch(url);
@@ -96,16 +99,15 @@ export class News extends Component {
     console.log(parsedData);
     this.setState({
       articles:this.state.articles.concat(parsedData.articles), 
-      totalResults:parsedData.totalResults, 
-      loading:false})
+      totalResults:parsedData.totalResults
+})
   };
   render() {
     
     return (
       <>
         <h1 className='text-center'>Latest News From -{this.props.category.toUpperCase()}</h1>
-        {/* {this.state.loading && <Spinner/>} */}
-
+        {this.state.loading && <Spinner/>}
         <InfiniteScroll
             dataLength={this.state.articles.length} //This is important field to render the next data
             next={this.fetchData}
@@ -123,6 +125,7 @@ export class News extends Component {
         </div>
         </div>
         </InfiniteScroll>
+
         {/* <div className='container d-flex justify-content-between'>
           <button disabled = {this.state.page<=1} type="button" className='btn btn-dark' onClick={this.handlePrevClick}>&laquo; Previous </button>
           <p>Page {this.state.page}</p>
